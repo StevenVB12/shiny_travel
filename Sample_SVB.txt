@@ -1,0 +1,8 @@
+Arrive	Leave	Place	Reason
+2016-07-22	2016-08-06	Sint-Niklaas	leisure
+2016-08-06	2016-09-03	Puerto Rico	work
+2016-09-03	2016-09-17	Wakefield	companion
+2016-09-17	2016-10-20	Starkville	work
+2016-10-24	2016-11-06	Wakefield	companion
+2016-11-06	2016-12-13	Starkville	work
+2016-12-13	2017-01-04	Puerto Rico	work
