@@ -26,11 +26,13 @@ Mode <- function(x) {
 shinyServer(function(input, output) {
   
   
+  # load example data when 'Run example'
   mydata <- observeEvent(input$action, {
     tbl <- read.table("Sample_SVB.txt", header = TRUE, sep = '\t')
   
   })
-    
+  
+  # Calculate distance and time data  
   mydata <- reactive({
     
     inFile <- input$file
@@ -86,7 +88,7 @@ shinyServer(function(input, output) {
   })
   
   
-  
+  # Return original data with distance and time stats
   output$table1 <- renderFormattable({
     if(ncol(mydata()) == 4){
        formattable(mydata(), list("Years" = color_bar("orange", fun = "proportion"),
@@ -109,6 +111,7 @@ shinyServer(function(input, output) {
     
   })
   
+  # Calculate table with stats for 'reasons'
   mydata2 <- reactive({
     if (!is.null(input$file) | input$action != 0){
       tbl <- mydata()
@@ -181,7 +184,7 @@ shinyServer(function(input, output) {
     }
   })
   
-  
+  # Calculate table with stats per 'place'
   mydata3 <- reactive({
     if (!is.null(input$file) | input$action != 0){
       
@@ -204,11 +207,12 @@ shinyServer(function(input, output) {
   })
   
   
-  
+  # Make the map
   output$map <- renderLeaflet({
     
     inFile <- input$file
     
+    # Show empty map if no data
     if (is.null(inFile) & input$action == 0)
       return(
         leaflet() %>%
@@ -223,6 +227,7 @@ shinyServer(function(input, output) {
    
       tbl <- mydata()
       
+      # Summarize with most frequent reason of travel path
       tblPlace <- ddply(tbl, c("Place"), summarise, Reason = Mode(Reason), Days = sum(Days), Lat = mean(Lat), Lon = mean(Lon))
       
       colors <- c("black", "orange", "green", "red")
@@ -283,12 +288,13 @@ shinyServer(function(input, output) {
           
           for(e in 1:(nrow(tbl)-1)){
             
-            if(tbl$Reason[e] != 'work'){
-              colr <- tbl$colors[e]
+            # work get lowest priority
+            if(tbl$Reason[e+1] == 'work'){
+            colr <- tbl$colors[e]
             }
             else{ colr <- tbl$colors[e+1]}
 
-            basemap <- basemap %>% addPolylines(data=tbl[e:(e+1),], ~Lon, ~Lat, color = colr, weight = tbl$freq[e]*2, opacity = 0.6)
+            basemap <- basemap %>% addPolylines(data=tbl[e:(e+1),], ~Lon, ~Lat, color = colr, weight = tbl$freq[e], opacity = 0.6)
           }
         
         return(basemap)
