@@ -1,7 +1,15 @@
 Arrive	Leave	Place	Reason
-2009-10-01	2010-05-20	Ghent	work
+2008-10-01	2009-03-23	Ghent	work
+2009-03-23	2009-03-30	Quito	field
+2009-03-30	2009-04-06	Guayaquil	field
+2009-04-06	2009-05-05	Galapagos	field
+2009-05-05	2010-05-20	Ghent	work
 2010-05-20	2010-05-26	Poland	conference
-2010-05-26	2011-05-23	Ghent	work
+2010-05-26	2010-09-15	Ghent	work
+2010-09-15	2010-09-20	Guerande	field
+2010-09-20	2011-04-08	Ghent	work
+2011-04-08	2011-04-11	Guerande	field
+2011-04-11	2011-05-23	Ghent	work
 2011-05-23	2011-05-27	Vienna	conference
 2011-05-27	2011-08-10	Ghent	work
 2011-08-10	2011-08-15	Portugal	conference
@@ -10,9 +18,15 @@ Arrive	Leave	Place	Reason
 2012-07-15	2013-05-25	Ghent	work
 2013-05-25	2013-05-30	Montpellier	conference
 2013-05-30	2013-12-02	Ghent	work
-2013-12-02	2013-12-24	Buenos Aires	leisure
+2013-11-27	2013-11-29	Buenos Aires	leisure
+2013-11-29	2013-12-02	El Calafate	leisure	
+2013-12-02	2013-12-08	El Chalten	leisure
+2013-12-08	2013-12-10	El Calafate	leisure
+2013-12-10	2013-12-15	Pininsula Valdes	leisure
+2013-12-15	2013-12-19	Iguazu falls	leisure
+2013-12-19	2013-12-24	Buenos Aires	leisure
 2013-12-24	2014-05-01	Ghent	work
-2014-05-01	2014-05-30	Galapagos	work
+2014-05-01	2014-05-30	Galapagos	field
 2014-05-30	2014-08-20	Ghent	work
 2014-08-20	2014-08-30	Portugal	leisure
 2014-08-30	2014-10-10	Ghent	work
@@ -24,7 +38,9 @@ Arrive	Leave	Place	Reason
 2015-04-25	2015-04-27	Sint-Niklaas	leisure
 2015-04-27	2015-07-12	Cambridge	work
 2015-07-12	2015-07-23	Sint-Niklaas	leisure
-2015-07-23	2015-08-06	Panama	work
+2015-07-23	2015-07-30	Gamboa	conference
+2015-07-30	2015-08-02	Darien Province	field
+2015-08-02	2015-08-06	Gamboa	work
 2015-08-06	2016-06-16	Puerto Rico	work
 2016-06-16	2016-06-23	Austin	conference
 2016-06-23	2016-06-27	Puerto Rico	work
@@ -63,3 +79,7 @@ Arrive	Leave	Place	Reason
 2017-12-12	2018-01-03	Sint-Niklaas	leisure
 2018-01-03	2018-01-06	Bristol	conference
 2018-01-06	2018-02-21	Cambridge	work
+2018-02-22	2018-02-26	Sint-Niklaas	leisure
+2018-02-27	2018-03-22	Cambridge	work
+2018-03-22	2018-04-15	Wakefield	companion
+2018-04-16	2018-05-30	Cambridge	work

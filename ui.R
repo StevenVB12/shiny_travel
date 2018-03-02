@@ -31,7 +31,7 @@ shinyUI(fluidPage(
            column(3,
                   h3("Travel information"),
                   h5("Provide travel inforamtion in a TAB delimited format as shown in the example. 
-                     Possible reasons for travelling are 'work', 'conference', 'leisure' and 'companion'"),
+                     Possible reasons for travelling are 'work', 'conference', 'leisure', 'field' and 'companion'."),
                   
                   fileInput("file", 
                             accept = c('text/tab-separated-values'),

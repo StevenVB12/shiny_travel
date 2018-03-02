@@ -95,8 +95,9 @@ shinyServer(function(input, output) {
                                   "Distance (km)" = color_bar("pink", fun = "proportion"),
                                   "Reason" = formatter("span", style = x ~ifelse(x == "work", style(color = "black", font.weight = "normal"),
                                                                               ifelse(x == "conference", style(color = "orange", font.weight = "normal"),
-                                                                                     ifelse(x == "leisure", style(color = "green", font.weight = "normal"),
-                                                                                            ifelse(x == "companion", style(color = "red", font.weight = "normal"),NA))))
+                                                                                     ifelse(x == "leisure", style(color = "blue", font.weight = "normal"),
+                                                                                            ifelse(x == "companion", style(color = "red", font.weight = "normal"),
+                                                                                                   ifelse(x == "field", style(color = "green", font.weight = "normal"),NA)))))
                                )))
     }
     else{
@@ -104,8 +105,9 @@ shinyServer(function(input, output) {
                                               "Distance (km)" = color_bar("pink", fun = "proportion"),
                                               "Reason" = formatter("span", style = x ~ifelse(x == "work", style(color = "black", font.weight = "normal"),
                                                                                 ifelse(x == "conference", style(color = "orange", font.weight = "normal"),
-                                                                                       ifelse(x == "leisure", style(color = "green", font.weight = "normal"),
-                                                                                              ifelse(x == "companion", style(color = "red", font.weight = "normal"),NA))))
+                                                                                       ifelse(x == "leisure", style(color = "blue", font.weight = "normal"),
+                                                                                              ifelse(x == "companion", style(color = "red", font.weight = "normal"),
+                                                                                                     ifelse(x == "field", style(color = "green", font.weight = "normal"),NA)))))
                                  )))
     }
     
@@ -120,32 +122,44 @@ shinyServer(function(input, output) {
       conference <- 0
       leisure <- 0
       companion <- 0
+      field <- 0
       
-      reasons <- c('work', 'conference', 'leisure','companion')
+      reasons <- c('work', 'conference', 'leisure','companion','field')
       for(e in 1:(nrow(tbl)-1)){
         
         if(tbl$Reason[e] == 'work'       & tbl$Reason[e+1] == 'work')      {work       <- work       + as.numeric(tbl$"Distance (km)"[e+1])}
         if(tbl$Reason[e] == 'conference' & tbl$Reason[e+1] == 'conference'){conference <- conference + as.numeric(tbl$"Distance (km)"[e+1])}
         if(tbl$Reason[e] == 'leisure'    & tbl$Reason[e+1] == 'leisure')   {leisure    <- leisure    + as.numeric(tbl$"Distance (km)"[e+1])}
         if(tbl$Reason[e] == 'companion'  & tbl$Reason[e+1] == 'companion') {companion  <- companion  + as.numeric(tbl$"Distance (km)"[e+1])}
+        if(tbl$Reason[e] == 'field'      & tbl$Reason[e+1] == 'field')     {field      <- field      + as.numeric(tbl$"Distance (km)"[e+1])}
         
         if(tbl$Reason[e] == 'work'       & tbl$Reason[e+1] == 'conference'){conference <- conference + as.numeric(tbl$"Distance (km)"[e+1])}
         if(tbl$Reason[e] == 'work'       & tbl$Reason[e+1] == 'leisure')   {leisure    <- leisure    + as.numeric(tbl$"Distance (km)"[e+1])}
         if(tbl$Reason[e] == 'work'       & tbl$Reason[e+1] == 'companion') {companion  <- companion  + as.numeric(tbl$"Distance (km)"[e+1])}
+        if(tbl$Reason[e] == 'work'       & tbl$Reason[e+1] == 'field')     {field      <- field      + as.numeric(tbl$"Distance (km)"[e+1])}
         
         if(tbl$Reason[e] == 'conference' & tbl$Reason[e+1] == 'work')      {conference <- conference + as.numeric(tbl$"Distance (km)"[e+1])}
-        if(tbl$Reason[e] == 'leisure'    & tbl$Reason[e+1] == 'work')      {leisure    <- leisure    + as.numeric(tbl$"Distance (km)"[e+1])}
-        if(tbl$Reason[e] == 'companion'  & tbl$Reason[e+1] == 'work')      {companion  <- companion  + as.numeric(tbl$"Distance (km)"[e+1])}
-        
         if(tbl$Reason[e] == 'conference' & tbl$Reason[e+1] == 'leisure')   {leisure    <- leisure    + as.numeric(tbl$"Distance (km)"[e+1])}
-        if(tbl$Reason[e] == 'leisure'    & tbl$Reason[e+1] == 'conference'){conference <- conference + as.numeric(tbl$"Distance (km)"[e+1])}
         if(tbl$Reason[e] == 'conference' & tbl$Reason[e+1] == 'companion') {companion  <- companion  + as.numeric(tbl$"Distance (km)"[e+1])}
+        if(tbl$Reason[e] == 'conference' & tbl$Reason[e+1] == 'field')     {field      <- field      + as.numeric(tbl$"Distance (km)"[e+1])}
+        
+        if(tbl$Reason[e] == 'leisure'    & tbl$Reason[e+1] == 'work')      {leisure    <- leisure    + as.numeric(tbl$"Distance (km)"[e+1])}
+        if(tbl$Reason[e] == 'leisure'    & tbl$Reason[e+1] == 'conference'){conference <- conference + as.numeric(tbl$"Distance (km)"[e+1])}
         if(tbl$Reason[e] == 'leisure'    & tbl$Reason[e+1] == 'companion') {companion  <- companion  + as.numeric(tbl$"Distance (km)"[e+1])}
-        if(tbl$Reason[e] == 'companion'  & tbl$Reason[e+1] == 'leisure')   {companion  <- companion  + as.numeric(tbl$"Distance (km)"[e+1])}
-        if(tbl$Reason[e] == 'companion'  & tbl$Reason[e+1] == 'conference'){companion  <- companion  + as.numeric(tbl$"Distance (km)"[e+1])}
+        if(tbl$Reason[e] == 'leisure'    & tbl$Reason[e+1] == 'field')     {field      <- field      + as.numeric(tbl$"Distance (km)"[e+1])}
+        
+        if(tbl$Reason[e] == 'companion'  & tbl$Reason[e+1] == 'work')      {companion  <- companion  + as.numeric(tbl$"Distance (km)"[e+1])}
+        if(tbl$Reason[e] == 'companion'  & tbl$Reason[e+1] == 'leisure')   {leisure    <- leisure    + as.numeric(tbl$"Distance (km)"[e+1])}
+        if(tbl$Reason[e] == 'companion'  & tbl$Reason[e+1] == 'conference'){conference <- conference + as.numeric(tbl$"Distance (km)"[e+1])}
+        if(tbl$Reason[e] == 'companion'  & tbl$Reason[e+1] == 'field')     {field      <- field      + as.numeric(tbl$"Distance (km)"[e+1])}
+        
+        if(tbl$Reason[e] == 'field'      & tbl$Reason[e+1] == 'work')      {field      <- field      + as.numeric(tbl$"Distance (km)"[e+1])}
+        if(tbl$Reason[e] == 'field'      & tbl$Reason[e+1] == 'leisure')   {leisure    <- leisure    + as.numeric(tbl$"Distance (km)"[e+1])}
+        if(tbl$Reason[e] == 'field'      & tbl$Reason[e+1] == 'conference'){conference <- conference + as.numeric(tbl$"Distance (km)"[e+1])}
+        if(tbl$Reason[e] == 'field'      & tbl$Reason[e+1] == 'companion') {companion  <- companion  + as.numeric(tbl$"Distance (km)"[e+1])}
       }
       
-      tblDistance <- cbind(reasons, c(work, conference, leisure, companion))
+      tblDistance <- cbind(reasons, c(work, conference, leisure, companion, field))
       colnames(tblDistance) <- c("Reason", "Distance (km)")
       
       tblDays <- ddply(tbl, c("Reason"), summarise, Days = sum(Days))
@@ -176,8 +190,9 @@ shinyServer(function(input, output) {
                                   "Distance (km)" = color_bar("pink", fun = "proportion"),
                                   "Reason" = formatter("span", style = x ~ifelse(x == "work", style(color = "black", font.weight = "normal"),
                                                                                  ifelse(x == "conference", style(color = "orange", font.weight = "normal"),
-                                                                                        ifelse(x == "leisure", style(color = "green", font.weight = "normal"),
-                                                                                               ifelse(x == "companion", style(color = "red", font.weight = "normal"),NA)))))))
+                                                                                        ifelse(x == "leisure", style(color = "blue", font.weight = "normal"),
+                                                                                               ifelse(x == "companion", style(color = "red", font.weight = "normal"),
+                                                                                                      ifelse(x == "field", style(color = "green", font.weight = "normal"),NA))))))))
     }
     else{
       return(NULL)
@@ -230,8 +245,8 @@ shinyServer(function(input, output) {
       # Summarize with most frequent reason of travel path
       tblPlace <- ddply(tbl, c("Place"), summarise, Reason = Mode(Reason), Days = sum(Days), Lat = mean(Lat), Lon = mean(Lon))
       
-      colors <- c("black", "orange", "green", "red")
-      Reason <- c("work", "conference", "leisure", "companion")
+      colors <- c("black", "orange", "blue", "red","green")
+      Reason <- c("work", "conference", "leisure", "companion","field")
       df <- data.frame(Reason, colors)
       
       tblPlace <- merge(tblPlace, df, by="Reason")
