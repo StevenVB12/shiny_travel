@@ -46,6 +46,10 @@ shinyUI(fluidPage(
   ),
   
   fluidRow(column(7, 
+                  conditionalPanel(condition = "output.processed" , h3("Distance travelled per year")),
+                  conditionalPanel(condition = "output.processed" , plotOutput("plot1")),
+                  conditionalPanel(condition = "output.processed" , h3("Days spent per year")),
+                  conditionalPanel(condition = "output.processed" , plotOutput("plot2")),
                   conditionalPanel(condition = "output.fileNotUploaded" , h3("Example data")),
                   conditionalPanel(condition = "output.fileUploaded" , h3("Your data")),
                   formattableOutput("table1")),

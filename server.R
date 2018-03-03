@@ -15,6 +15,7 @@ library(formattable)
 library(plyr)
 library(mapview)
 
+###
 key <- "AIzaSyC_Ou0_TXeuXbvCUgh2Ezih5Krh_0RIE9I"
 
 # function to get the most frequent Reason of being in a place
@@ -22,15 +23,19 @@ Mode <- function(x) {
   ux <- unique(x)
   ux[which.max(tabulate(match(x, ux)))]
 }
+###
+
+
 
 shinyServer(function(input, output) {
   
   
   # load example data when 'Run example'
-  mydata <- observeEvent(input$action, {
+  mydata <- eventReactive(input$action, {
     tbl <- read.table("Sample_SVB.txt", header = TRUE, sep = '\t')
   
   })
+  
   
   # Calculate distance and time data  
   mydata <- reactive({
@@ -65,7 +70,7 @@ shinyServer(function(input, output) {
     
     tbl <- tbl[order(as.Date(tbl$Arrive)),]
     
-    tbl$Days <- as.integer(as.Date(tbl$Leave) - as.Date(tbl$Arrive)) 
+    tbl$Days <- as.integer(as.Date(tbl$Depart) - as.Date(tbl$Arrive)) 
     tbl$Years <- tbl$Days/365
     
     
@@ -82,7 +87,7 @@ shinyServer(function(input, output) {
     tbl <- tbl[,c(2,3,1,4,5,6,7,8,9)]
     rownames(tbl) <- c()
 
-    colnames(tbl) <- c("Arrive", "Leave", "Place", "Reason", "Lat", "Lon", "Days", "Years", "Distance (km)")
+    colnames(tbl) <- c("Arrive", "Depart", "Place", "Reason", "Lat", "Lon", "Days", "Years", "Distance (km)")
     return(tbl)
     
   })
@@ -90,7 +95,7 @@ shinyServer(function(input, output) {
   
   # Return original data with distance and time stats
   output$table1 <- renderFormattable({
-    if(ncol(mydata()) == 4){
+    if(ncol(mydata()) == 4){ # If nothing has been calculate, just show formatted table
        formattable(mydata(), list("Years" = color_bar("orange", fun = "proportion"),
                                   "Distance (km)" = color_bar("pink", fun = "proportion"),
                                   "Reason" = formatter("span", style = x ~ifelse(x == "work", style(color = "black", font.weight = "normal"),
@@ -112,6 +117,7 @@ shinyServer(function(input, output) {
     }
     
   })
+  
   
   # Calculate table with stats for 'reasons'
   mydata2 <- reactive({
@@ -199,6 +205,7 @@ shinyServer(function(input, output) {
     }
   })
   
+  
   # Calculate table with stats per 'place'
   mydata3 <- reactive({
     if (!is.null(input$file) | input$action != 0){
@@ -246,7 +253,7 @@ shinyServer(function(input, output) {
       tblPlace <- ddply(tbl, c("Place"), summarise, Reason = Mode(Reason), Days = sum(Days), Lat = mean(Lat), Lon = mean(Lon))
       
       colors <- c("black", "orange", "blue", "red","green")
-      Reason <- c("work", "conference", "leisure", "companion","field")
+      Reason <- c("work", "conference", "leisure", "companion", "field")
       df <- data.frame(Reason, colors)
       
       tblPlace <- merge(tblPlace, df, by="Reason")
@@ -315,6 +322,173 @@ shinyServer(function(input, output) {
         return(basemap)
       }
     }
+  })
+  
+  
+  # make plot distance
+  output$plot1 <- renderPlot({
+    
+    if (!is.null(input$file) | input$action != 0){
+    
+      tbl <- mydata()
+      tbl$Arrive <- as.Date(tbl$Arrive)
+      tbl$Depart <- as.Date(tbl$Depart)
+      
+      tbl$Year <- format(as.Date(tbl$Arrive, format="%Y-%m-%d"),"%Y")
+      tbl$Year <- as.numeric(tbl$Year)
+      
+      colnames(tbl) <- c("Arrive", "Depart", "Place", "Reason", "Lat", "Lon", "Days", "Years", "Distance", "Year")
+      
+      tbl$Reason2 <- tbl$Reason
+      for(e in 2:(nrow(tbl)-1)){
+        if(tbl$Reason[e] == 'work'){
+          tbl$Reason2[e] <- tbl$Reason[e-1]
+        }  
+      }
+      
+      
+      tblDistanceYear <- ddply(tbl, c("Year","Reason2"), summarise, Distance = sum(Distance))
+      
+      Years <- as.numeric(unique(tblDistanceYear$Year))
+      colors <- c("black", "orange", "blue", "red","green")
+      Reasons <- c("work", "conference", "leisure", "companion", "field")
+      
+      # add zeros for missing years
+      for(e in 1:length(Years)){
+        subTable <- subset(tblDistanceYear, tblDistanceYear$Year == Years[e])
+        for(i in 1:length(Reasons)){
+          if(!is.element(Reasons[i], subTable$Reason2)){
+            tblDistanceYear <- rbind(tblDistanceYear, c(Years[e], Reasons[i], 0))
+          }
+        }
+      }
+      tblDistanceYear$Year <- as.numeric(tblDistanceYear$Year)
+      tblDistanceYear$Distance <- as.numeric(tblDistanceYear$Distance)
+      tblDistanceYear <- tblDistanceYear[order(tblDistanceYear$Year),]
+      
+     
+      # par(mar=c(5.1, 4.1, 4.1, 11.1), xpd=TRUE)
+      
+      plot(NULL, 
+           xlab = "Year",
+           ylab = "Distance (km)",
+           xlim = c(min(tblDistanceYear$Year),max(tblDistanceYear$Year)), 
+           ylim = c(min(tblDistanceYear$Distance),max(tblDistanceYear$Distance)))
+      
+      for(i in 1:length(Reasons)){
+        
+        subtbl <- subset(tblDistanceYear, as.character(tblDistanceYear$Reason2) == Reasons[i])
+        par(new = TRUE)
+        plot(subtbl$Year, subtbl$Distance, col = adjustcolor(colors[i], alpha.f = 0.3), pch = 19, type = 'b', lwd = 2, cex = 2, 
+             xlim = c(min(tblDistanceYear$Year),max(tblDistanceYear$Year)), 
+             ylim = c(min(tblDistanceYear$Distance),max(tblDistanceYear$Distance)),
+             axes = FALSE, ann = FALSE)
+      }
+      
+      # legend("topright", inset=c(-0.45,0),
+      #          c("work", "conference", "leisure", "companion", "field"), lwd=2, 
+      #          col=c("black", "orange", "blue", "red","green"), y.intersp=1.5, bty = 'n')
+      
+    }
+    else{
+      return(NULL)
+    }
+  })
+  
+  
+  # make plot days
+  output$plot2 <- renderPlot({
+    
+    if (!is.null(input$file) | input$action != 0){
+      
+      tbl <- mydata()
+      tbl$Arrive <- as.Date(tbl$Arrive)
+      tbl$Depart <- as.Date(tbl$Depart)
+      
+      tbl$Year1 <- format(as.Date(tbl$Arrive, format="%Y-%m-%d"),"%Y")
+      tbl$Year1 <- as.numeric(tbl$Year1)
+      tbl$Year2 <- format(as.Date(tbl$Depart, format="%Y-%m-%d"),"%Y")
+      tbl$Year2 <- as.numeric(tbl$Year2)
+      
+      tbl$DaysYear1 <- 0
+      tbl$DaysYear2 <- 0
+      for(e in 1:nrow(tbl)){
+        if(tbl$Year1[e] == tbl$Year2[e]){
+          tbl$DaysYear1[e] <- tbl$Days[e]
+          tbl$DaysYear2[e] <- 0
+        }
+        if(tbl$Year1[e] != tbl$Year2[e]){
+          tbl$DaysYear1[e] <- as.Date(paste(tbl$Year1[e],'12','31',sep='-')) - tbl$Arrive[e]
+          tbl$DaysYear2[e] <- tbl$Depart[e] - as.Date(paste(tbl$Year2[e],'01','01',sep='-'))
+        }
+      }
+      
+      colnames(tbl) <- c("Arrive", "Depart", "Place", "Reason", "Lat", "Lon", "Days", "Years", "Distance", "Year1","Year2","DaysYear1","DaysYear2")
+
+      
+      tblDistanceYearY1 <- ddply(tbl, c("Year1","Reason"), summarise, Days = sum(DaysYear1))
+      tblDistanceYearY2 <- ddply(tbl, c("Year2","Reason"), summarise, Days = sum(DaysYear2))
+      
+      colnames(tblDistanceYearY1) <- c('Year','Reason','Days')
+      colnames(tblDistanceYearY2) <- c('Year','Reason','Days')
+      
+      tblDistanceYearY12 <- rbind(tblDistanceYearY1,tblDistanceYearY2)
+      tblDistanceYearD <- ddply(tblDistanceYearY12, c("Year","Reason"), summarise, Days = sum(Days))
+      
+      Years <- as.numeric(unique(tblDistanceYearD$Year))
+      colors <- c("black", "orange", "blue", "red","green")
+      Reasons <- c("work", "conference", "leisure", "companion", "field")
+      
+      # add zeros for missing years
+      for(e in min(Years):max(Years)){
+        if(!is.element(e, as.numeric(as.character(tbl$Year1))) & !is.element(e, as.numeric(as.character(tbl$Year2)))){
+          tblDistanceYearD <- rbind(tblDistanceYearD, c(e, "work", 365))
+          tblDistanceYearD <- rbind(tblDistanceYearD, c(e, "conference", 0))
+          tblDistanceYearD <- rbind(tblDistanceYearD, c(e, "leisure", 0))
+          tblDistanceYearD <- rbind(tblDistanceYearD, c(e, "companion", 0))
+          tblDistanceYearD <- rbind(tblDistanceYearD, c(e, "field", 0))
+        }
+        else{
+          subTable <- subset(tblDistanceYearD, tblDistanceYearD$Year == e)
+          for(i in 1:length(Reasons)){
+            if(!is.element(Reasons[i], subTable$Reason)){
+              tblDistanceYearD <- rbind(tblDistanceYearD, c(e, Reasons[i], 0))
+            }
+          }
+        }
+      }
+      tblDistanceYearD$Year <- as.numeric(tblDistanceYearD$Year)
+      tblDistanceYearD$Days <- as.numeric(tblDistanceYearD$Days)
+      tblDistanceYearD <- tblDistanceYearD[order(tblDistanceYearD$Year),]
+      
+      # par(mar=c(5.1, 4.1, 4.1, 11.1), xpd=TRUE)
+      
+      plot(NULL, 
+           xlab = "Year",
+           ylab = "Days",
+           xlim = c(min(tblDistanceYearD$Year),max(tblDistanceYearD$Year)), 
+           ylim = c(min(tblDistanceYearD$Days),max(tblDistanceYearD$Days)))
+      
+      for(i in 1:length(Reasons)){
+        
+        subtbl <- subset(tblDistanceYearD, as.character(tblDistanceYearD$Reason) == Reasons[i])
+        
+        par(new = TRUE)
+        plot(subtbl$Year, subtbl$Days, col = adjustcolor(colors[i], alpha.f = 0.3), pch = 19, type = 'b', lwd = 2, cex = 2,
+             xlim = c(min(tblDistanceYearD$Year),max(tblDistanceYearD$Year)), 
+             ylim = c(min(tblDistanceYearD$Days),max(tblDistanceYearD$Days)),
+             axes = FALSE, ann = FALSE)
+      }
+      
+      # legend("topright", inset=c(-0.45,0),
+      #          c("work", "conference", "leisure", "companion", "field"), lwd=2, 
+      #          col=c("black", "orange", "blue", "red","green"), y.intersp=1.5, bty = 'n')
+      
+    }
+    else{
+      return(NULL)
+    }
+  
   })
   
   output$fileNotUploaded <- reactive({
