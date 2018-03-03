@@ -249,8 +249,10 @@ shinyServer(function(input, output) {
    
       tbl <- mydata()
       
+      tbl$Dateconc <- paste(tbl$Arrive, tbl$Depart, sep = ' till ')
+      
       # Summarize with most frequent reason of travel path
-      tblPlace <- ddply(tbl, c("Place"), summarise, Reason = Mode(Reason), Days = sum(Days), Lat = mean(Lat), Lon = mean(Lon))
+      tblPlace <- ddply(tbl, c("Place"), summarise, Reason = Mode(Reason), Days = sum(Days), Lat = mean(Lat), Lon = mean(Lon), dates=paste(Dateconc, collapse = "<br>"))
       
       colors <- c("black", "orange", "blue", "red","green")
       Reason <- c("work", "conference", "leisure", "companion", "field")
@@ -306,7 +308,7 @@ shinyServer(function(input, output) {
             addProviderTiles("Stamen.TonerHybrid") %>%
             addFullscreenControl(pseudoFullscreen = TRUE) %>%
             addCircleMarkers(data=tblPlace, ~Lon, ~Lat, color = tblPlace$colors, radius = log(tblPlace$Days)*3) %>%
-            addAwesomeMarkers(data=tblPlace, ~Lon, ~Lat,  icon = icons, popup = paste(tblPlace$Place, sep="<br>"))
+            addAwesomeMarkers(data=tblPlace, ~Lon, ~Lat,  icon = icons, popup = paste(tblPlace$Place, tblPlace$dates, sep="<br>"))
           
           for(e in 1:(nrow(tbl)-1)){
             
