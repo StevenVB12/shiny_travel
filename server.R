@@ -348,6 +348,7 @@ shinyServer(function(input, output) {
       
       
       tblDistanceYear <- ddply(tbl, c("Year","Reason2"), summarise, Distance = sum(Distance))
+      tblDistanceYearT <- ddply(tbl, c("Year"), summarise, Distance = sum(Distance))
       
       Years <- as.numeric(unique(tblDistanceYear$Year))
       colors <- c("black", "orange", "blue", "red","green")
@@ -372,19 +373,31 @@ shinyServer(function(input, output) {
       plot(NULL, 
            xlab = "Year",
            ylab = "Distance (km)",
-           xlim = c(min(tblDistanceYear$Year),max(tblDistanceYear$Year)), 
-           ylim = c(min(tblDistanceYear$Distance),max(tblDistanceYear$Distance)))
+           xlim = c(min(tblDistanceYearT$Year),max(tblDistanceYearT$Year)), 
+           ylim = c(min(tblDistanceYearT$Distance),max(tblDistanceYearT$Distance)))
+      
+      y <- rep(tblDistanceYearT$Distance)
+      x <- rep(tblDistanceYearT$Year)
+      x2 <- c(min(x), x, max(x))
+      y2 <- c(0, y, 0)
+      
+      polygon(x2, y2, col = adjustcolor("pink", alpha.f = 0.2), border = NA)
       
       for(i in 1:length(Reasons)){
         
         subtbl <- subset(tblDistanceYear, as.character(tblDistanceYear$Reason2) == Reasons[i])
         par(new = TRUE)
         plot(subtbl$Year, subtbl$Distance, col = adjustcolor(colors[i], alpha.f = 0.3), pch = 19, type = 'b', lwd = 2, cex = 2, 
-             xlim = c(min(tblDistanceYear$Year),max(tblDistanceYear$Year)), 
-             ylim = c(min(tblDistanceYear$Distance),max(tblDistanceYear$Distance)),
+             xlim = c(min(tblDistanceYearT$Year),max(tblDistanceYearT$Year)), 
+             ylim = c(min(tblDistanceYearT$Distance),max(tblDistanceYearT$Distance)),
              axes = FALSE, ann = FALSE)
       }
       
+      # par(new = TRUE)
+      # plot(tblDistanceYearT$Year, tblDistanceYearT$Distance, col = adjustcolor("black", alpha.f = 0.3), pch = 1, type = 'b', lwd = 2, cex = 2, 
+      #      xlim = c(min(tblDistanceYearT$Year),max(tblDistanceYearT$Year)), 
+      #      ylim = c(min(tblDistanceYearT$Distance),max(tblDistanceYearT$Distance)),
+      #      axes = FALSE, ann = FALSE)
       # legend("topright", inset=c(-0.45,0),
       #          c("work", "conference", "leisure", "companion", "field"), lwd=2, 
       #          col=c("black", "orange", "blue", "red","green"), y.intersp=1.5, bty = 'n')
@@ -435,9 +448,20 @@ shinyServer(function(input, output) {
       tblDistanceYearY12 <- rbind(tblDistanceYearY1,tblDistanceYearY2)
       tblDistanceYearD <- ddply(tblDistanceYearY12, c("Year","Reason"), summarise, Days = sum(Days))
       
+      tblDistanceYearY12NW <- subset(tblDistanceYearY12, tblDistanceYearY12$Reason != "work")
+      tblDistanceYearDT <- ddply(tblDistanceYearY12NW, c("Year"), summarise, Days = sum(Days))
+      
       Years <- as.numeric(unique(tblDistanceYearD$Year))
       colors <- c("black", "orange", "blue", "red","green")
       Reasons <- c("work", "conference", "leisure", "companion", "field")
+      
+      for(e in min(Years):max(Years)){
+        if(!is.element(e, as.numeric(as.character(tblDistanceYearDT$Year)))){
+          tblDistanceYearDT <- rbind(tblDistanceYearDT, c(e, 0))
+        }
+      }
+      tblDistanceYearDT <- tblDistanceYearDT[order(tblDistanceYearDT$Year),]
+      
       
       # add zeros for missing years
       for(e in min(Years):max(Years)){
@@ -468,6 +492,14 @@ shinyServer(function(input, output) {
            ylab = "Days",
            xlim = c(min(tblDistanceYearD$Year),max(tblDistanceYearD$Year)), 
            ylim = c(min(tblDistanceYearD$Days),max(tblDistanceYearD$Days)))
+      
+      y <- rep(tblDistanceYearDT$Days)
+      x <- rep(tblDistanceYearDT$Year)
+      x2 <- c(min(x), x, max(x))
+      y2 <- c(0, y, 0)
+      
+      polygon(x2, y2, col = adjustcolor("pink", alpha.f = 0.2), border = NA)
+      
       
       for(i in 1:length(Reasons)){
         
