@@ -58,13 +58,16 @@ shinyServer(function(input, output) {
     Place <- as.vector(unique(tbl$Place))
     Lat <- c()
     Lon <- c()
+    country <- c()
     for(e in 1:length(Place)){
       LatLonData <- google_geocode(as.character(Place[e]), key = key, simplify = TRUE)
       Lat <- c(Lat, LatLonData$results$geometry$location$lat[1])
       Lon <- c(Lon, LatLonData$results$geometry$location$lng[1])
+      countryIndx <- grep('country', LatLonData$results$address_components[[1]]$types)
+      country <- c(country, LatLonData$results$address_components[[1]]$long_name[countryIndx])
     }
     
-    PlaceLatLon <- as.data.frame(cbind(Place,Lat,Lon))
+    PlaceLatLon <- as.data.frame(cbind(Place,Lat,Lon,country))
     
     tbl <- merge(tbl, PlaceLatLon, by="Place")
     
@@ -84,10 +87,10 @@ shinyServer(function(input, output) {
                                      fun = distHaversine))/1000, 2))
     }
     
-    tbl <- tbl[,c(2,3,1,4,5,6,7,8,9)]
+    tbl <- tbl[,c(2,3,1,4,5,6,7,8,9,10)]
     rownames(tbl) <- c()
 
-    colnames(tbl) <- c("Arrive", "Depart", "Place", "Reason", "Lat", "Lon", "Days", "Years", "Distance (km)")
+    colnames(tbl) <- c("Arrive", "Depart", "Place", "Reason", "Lat", "Lon", "Country", "Days", "Years", "Distance (km)")
     return(tbl)
     
   })
@@ -229,6 +232,28 @@ shinyServer(function(input, output) {
   })
   
   
+  # Calculate table with stats per 'country'
+  mydata4 <- reactive({
+    if (!is.null(input$file) | input$action != 0){
+      
+      tbl <- mydata()
+      
+      tblPlace <- ddply(tbl, c("Country"), summarise, Days = sum(Days))
+      tblPlace$Years <- tblPlace$Days/365
+      
+      return(tblPlace)
+    }
+  })    
+  
+  output$table4 <- renderFormattable({
+    if (!is.null(input$file) | input$action != 0){
+      formattable(mydata4(), list("Years" = color_bar("orange", fun = "proportion")))
+    }
+    else{
+      return(NULL)
+    }
+  })
+  
   # Make the map
   output$map <- renderLeaflet({
     
@@ -252,7 +277,12 @@ shinyServer(function(input, output) {
       tbl$Dateconc <- paste(tbl$Arrive, tbl$Depart, sep = ' till ')
       
       # Summarize with most frequent reason of travel path
-      tblPlace <- ddply(tbl, c("Place"), summarise, Reason = Mode(Reason), Days = sum(Days), Lat = mean(Lat), Lon = mean(Lon), dates=paste(Dateconc, collapse = "<br>"))
+      tblPlace <- ddply(tbl, c("Place"), summarise, 
+                        Reason = Mode(Reason), 
+                        Days = sum(Days), 
+                        Lat = mean(Lat), 
+                        Lon = mean(Lon), 
+                        dates=paste(Dateconc, collapse = "<br>"))
       
       colors <- c("black", "orange", "blue", "red","green")
       Reason <- c("work", "conference", "leisure", "companion", "field")
@@ -308,7 +338,7 @@ shinyServer(function(input, output) {
             addProviderTiles("Stamen.TonerHybrid") %>%
             addFullscreenControl(pseudoFullscreen = TRUE) %>%
             addCircleMarkers(data=tblPlace, ~Lon, ~Lat, color = tblPlace$colors, radius = log(tblPlace$Days)*3) %>%
-            addAwesomeMarkers(data=tblPlace, ~Lon, ~Lat,  icon = icons, popup = paste(tblPlace$Place, tblPlace$dates, sep="<br>"))
+            addAwesomeMarkers(data=tblPlace, ~Lon, ~Lat,  icon = icons, popup = paste(tblPlace$Place, paste('Days: ', tblPlace$Days, sep=''), tblPlace$dates, sep="<br>"))
           
           for(e in 1:(nrow(tbl)-1)){
             
@@ -339,7 +369,7 @@ shinyServer(function(input, output) {
       tbl$Year <- format(as.Date(tbl$Arrive, format="%Y-%m-%d"),"%Y")
       tbl$Year <- as.numeric(tbl$Year)
       
-      colnames(tbl) <- c("Arrive", "Depart", "Place", "Reason", "Lat", "Lon", "Days", "Years", "Distance", "Year")
+      colnames(tbl) <- c("Arrive", "Depart", "Place", "Reason", "Lat", "Lon", "Country", "Days", "Years", "Distance", "Year")
       
       tbl$Reason2 <- tbl$Reason
       for(e in 2:(nrow(tbl)-1)){
@@ -438,7 +468,7 @@ shinyServer(function(input, output) {
         }
       }
       
-      colnames(tbl) <- c("Arrive", "Depart", "Place", "Reason", "Lat", "Lon", "Days", "Years", "Distance", "Year1","Year2","DaysYear1","DaysYear2")
+      colnames(tbl) <- c("Arrive", "Depart", "Place", "Reason", "Lat", "Lon", "Country", "Days", "Years", "Distance", "Year1","Year2","DaysYear1","DaysYear2")
 
       
       tblDistanceYearY1 <- ddply(tbl, c("Year1","Reason"), summarise, Days = sum(DaysYear1))

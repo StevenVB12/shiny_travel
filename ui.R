@@ -14,14 +14,10 @@ library(geosphere)
 library(formattable)
 library(plyr)
 library(mapview)
+# library(shinythemes)
 
-# function to get the most frequent Reason of being in a place
-Mode <- function(x) {
-  ux <- unique(x)
-  ux[which.max(tabulate(match(x, ux)))]
-}
 
-shinyUI(fluidPage(
+shinyUI(fluidPage(#theme = shinytheme("yeti"),
   
   title = h3("Shiny travel"), 
   
@@ -56,7 +52,9 @@ shinyUI(fluidPage(
            column(4, offset = 1,
                   conditionalPanel(condition = "output.processed" , h3("Time and distance travelled")),
                   formattableOutput("table2"),
-                  conditionalPanel(condition = "output.processed" , h3("Time spent in place")),
+                  conditionalPanel(condition = "output.processed" , h3("Time spent in country")),
+                  formattableOutput("table4"),
+                  conditionalPanel(condition = "output.processed" , h3("Time spent in city")),
                   formattableOutput("table3")))
            
            
