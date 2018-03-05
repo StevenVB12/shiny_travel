@@ -410,7 +410,7 @@ shinyServer(function(input, output) {
       tblDistanceYear <- tblDistanceYear[order(tblDistanceYear$Year1),]
       
      
-      par(mar=c(5.1, 4.1, 4.1, 5.1), xpd=TRUE)
+      # par(mar=c(5.1, 4.1, 4.1, 11.1), xpd=TRUE)
       
       plot(NULL, 
            xlab = "Year",
@@ -433,7 +433,7 @@ shinyServer(function(input, output) {
         par(new = TRUE)
         plot(subtbl$Year1, subtbl$Distance, col = adjustcolor(colors2[i], alpha.f = 0.3), pch = 19, type = 'b', lwd = 2, cex = 2, 
              xlim = c(min(tblDistanceYear$Year1),max(tblDistanceYear$Year1)), 
-             ylim = c(min(tblDistanceYear$Distance),max(tblDistanceYear$Distance)),
+             ylim = c(min(tblDistanceYearT$Distance),max(tblDistanceYearT$Distance)),
              xaxt = "n",
              axes = FALSE, ann = FALSE)
       }
@@ -444,8 +444,8 @@ shinyServer(function(input, output) {
       #      xlim = c(min(tblDistanceYearT$Year),max(tblDistanceYearT$Year)), 
       #      ylim = c(min(tblDistanceYearT$Distance),max(tblDistanceYearT$Distance)),
       #      axes = FALSE, ann = FALSE)
-      legend("topright", 
-               Reasons2, lwd=2, inset=c(-0.2,0),
+      legend(min(tblDistanceYear$Year1), max(tblDistanceYearT$Distance),
+               Reasons2, lwd=2, #inset=c(-0.2,0),
                col=colors2, box.col = adjustcolor("white", alpha.f = 0.5), bg = adjustcolor("white", alpha.f = 0.7), box.lwd = 0, y.intersp=1.5)
       
     }
@@ -540,7 +540,7 @@ shinyServer(function(input, output) {
       tblDistanceYearD$Days <- as.numeric(tblDistanceYearD$Days)
       tblDistanceYearD <- tblDistanceYearD[order(tblDistanceYearD$Year),]
       
-      par(mar=c(5.1, 4.1, 4.1, 5.1), xpd=TRUE)
+      # par(mar=c(5.1, 4.1, 4.1, 11.1), xpd=TRUE)
       
       plot(NULL, 
            xlab = "Year",
@@ -571,7 +571,8 @@ shinyServer(function(input, output) {
       axis(1, at = min(tblDistanceYearD$Year):max(tblDistanceYearD$Year))
       
       
-      legend("topright", Reasons2, lwd=2, inset=c(-0.2,0),
+      legend(min(tblDistanceYearD$Year), max(tblDistanceYearD$Days),
+             Reasons2, lwd=2, #inset=c(-0.2,0),
                col = colors2, box.col = adjustcolor("white", alpha.f = 0.5), bg = adjustcolor("white", alpha.f = 0.7), box.lwd = 0, y.intersp=1.5)
       
     }
