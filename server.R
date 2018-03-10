@@ -596,4 +596,15 @@ shinyServer(function(input, output) {
     return(!is.null(mydata2()))
   })
   outputOptions(output, 'processed', suspendWhenHidden=FALSE)
+  
+  
+  output$downloadData <- downloadHandler(
+    
+    filename = function() {
+      paste('data_', Sys.Date(), '.txt', sep='')
+    },
+    content = function(file) {
+      write.table(mydata(), file, row.names = FALSE, sep='\t', quote = FALSE)
+    }
+  )
 })

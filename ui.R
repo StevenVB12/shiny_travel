@@ -36,6 +36,8 @@ shinyUI(fluidPage(#theme = shinytheme("yeti"),
                   checkboxInput("checkbox", "Show travel connections", value = TRUE),
                   
                   actionButton("action", "Run example"),
+                  h3(),
+                  downloadButton("downloadData", "Download table"),
                   
                   # div(img(src = "SVB.jpg", height = 120, width = 180, align = "center"), style="text-align: center;"),
                   h5("- Steven M. Van Belleghem", align = "right"))
