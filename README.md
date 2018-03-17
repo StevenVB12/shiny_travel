@@ -5,6 +5,6 @@ A simple R shiny app that keeps track of travelling distances, time spent in pla
 https://stevenvanbelleghem.shinyapps.io/shiny_travel/
 
 Run in R:
-'''
+```
 runGitHub("shiny_travel","StevenVB12")
-'''
+```
