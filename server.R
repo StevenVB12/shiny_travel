@@ -16,7 +16,7 @@ library(plyr)
 library(mapview)
 
 ###
-key <- "AIzaSyC_Ou0_TXeuXbvCUgh2Ezih5Krh_0RIE9I"
+key <- ""
 
 # function to get the most frequent Reason of being in a place
 Mode <- function(x) {
